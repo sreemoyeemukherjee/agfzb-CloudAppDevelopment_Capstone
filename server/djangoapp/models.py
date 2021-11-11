@@ -42,7 +42,7 @@ class CarModel(models.Model):
     year = models.DateField(default=now)
     # Create a toString method for object string representation
     def __str__(self):
-        return "Name: " + self.name + "," + "Dealer Id: " + self.dealerId + "," + "Type: " + self.type + "," + "Year: " + self.year + "," + "Car Make: " + self.make
+        return "Name: " + self.name + "," + "Dealer Id: " + str(self.dealerId) + "," + "Type: " + self.type + "," + "Year: " + str(self.year)
 
 # <HINT> Create a plain Python class `CarDealer` to hold dealer data
 
