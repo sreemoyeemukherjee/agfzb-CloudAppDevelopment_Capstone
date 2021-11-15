@@ -1,5 +1,6 @@
 from django.urls import path
 from django.conf.urls.static import static
+from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
 from . import views
 
@@ -31,5 +32,6 @@ urlpatterns = [
     path('dealer/<int:dealer_id>/', views.get_dealer_details, name='dealer_details'),
     
     # path for add a review view
+    path('dealer/<int:dealer_id>/', csrf_exempt(views.add_review), name='add_review')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

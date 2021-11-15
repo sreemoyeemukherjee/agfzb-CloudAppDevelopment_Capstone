@@ -128,5 +128,14 @@ def analyze_review_sentiments(dealerreview):
     json_result = get_request(url, api_key=api_key, params=params)
     return json_result
 
-
+def post_request(url, json_payload, **kwargs):
+    print(kwargs)
+    print("GET from {} ".format(url))
+    try:
+        response = requests.post(url, params=kwargs, json=json_payload)
+        status_code = response.status_code
+        print("With status {} ".format(status_code))
+    except:
+        # If any error occurs
+        print("Network exception occurred")
 
