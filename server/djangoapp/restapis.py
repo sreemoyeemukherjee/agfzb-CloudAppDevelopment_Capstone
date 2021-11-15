@@ -15,7 +15,6 @@ def get_request(url, **kwargs):
     print(kwargs)
     print("GET from {} ".format(url))
     try:
-        print("HERE ENTERING!!!")
         if 'api_key' in kwargs:
             api_key = kwargs['api_key']
             authenticator = IAMAuthenticator(api_key)
@@ -23,23 +22,24 @@ def get_request(url, **kwargs):
                     version='2021-03-25', authenticator=authenticator)
             natural_language_understanding.set_service_url(url)
             # Call get method of requests library with URL and parameters
-            print(kwargs["params"]["text"])
-            try:
-                response = natural_language_understanding.analyze(features=Features(entities=EntitiesOptions(sentiment=True, limit=1)), return_analyzed_text = True, text=kwargs["params"]["text"]).get_result()
-            except Exception as e:
-                    print("HERE IS THE PROBLEM:", e)
-            print("RESPONSE: ", response)
-            # response = requests.get(url, headers={'Content-Type': 'application/json'},
-            #                         params=kwargs, auth=HTTPBasicAuth('apikey', api_key))
+            response = natural_language_understanding.analyze(language='en', features=Features(entities=EntitiesOptions(sentiment=True, limit=1)), return_analyzed_text = True, text=kwargs["params"]["text"])
+            status_code = response.get_status_code()
+            print("With status {} ".format(status_code))
+            print(response.get_result)
+            if response.get_result().get('entities'):
+                json_data = response.get_result().get('entities')[0].get('sentiment').get('label')
+            else:
+                json_data = ""
         else:
             response = requests.get(url, headers={'Content-Type': 'application/json'}, params=kwargs)
-            print("NOW ENTERED HERE")
+            status_code = response.status_code
+            print("With status {} ".format(status_code))
+            json_data = json.loads(response.text)
+    
     except:
         # If any error occurs
         print("Network exception occurred")
-    # status_code = response.status_code
-    # print("With status {} ".format(status_code))
-    json_data = json.loads(response.text)
+    print(json_data)
     return json_data
 
 # Create a `post_request` to make HTTP POST requests
@@ -121,7 +121,7 @@ def analyze_review_sentiments(dealerreview):
     params = dict()
     api_key = "COUZ50Z10XAzLQi_aZsOF5bcAtjjqWj6MpiVpOok8reA"
     params["text"] = dealerreview
-    params["version"] = "2021-08-01"
+    params["version"] = "2021-03-25"
     params["features"] = "sentiment"
     params["return_analyzed_text"] = True
     url = "https://api.us-south.natural-language-understanding.watson.cloud.ibm.com/instances/7b954983-308f-4ffd-a67c-79bd753f6e83"
