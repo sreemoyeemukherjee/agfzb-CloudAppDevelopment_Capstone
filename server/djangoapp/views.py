@@ -94,13 +94,15 @@ def registration_request(request):
 # Update the `get_dealerships` view to render the index page with a list of dealerships
 def get_dealerships(request):
     if request.method == "GET":
+        context = dict()
         url = "https://b2918b6e.us-south.apigw.appdomain.cloud/capstone/api/dealership"
         # Get dealers from the URL
         dealerships = get_dealers_from_cf(url)
+        context['dealership_list'] = dealerships
         # Concat all dealer's short name
         dealer_names = ' '.join([dealer.short_name for dealer in dealerships])
         # Return a list of dealer short name
-        return HttpResponse(dealer_names)
+        return render(request, 'djangoapp/index.html', context)
 
 def get_dealerships_by_state(request, state):
     if request.method == "GET":
@@ -115,16 +117,18 @@ def get_dealerships_by_state(request, state):
 # Create a `get_dealer_details` view to render the reviews of a dealer
 def get_dealer_details(request, dealer_id):
     if request.method == "GET":
+        context = dict()
         url = "https://b2918b6e.us-south.apigw.appdomain.cloud/capstone/api/review"
         # Get reviews from the URL
         reviews = get_dealer_reviews_from_cf(url, dealer_id)
+        context['reviews'] = reviews
         dealer_names=""
         # Concat all dealer's short name
         for review in reviews:
             dealer_names = dealer_names + ' ' + review.review
             dealer_names = dealer_names + ' ' + review.sentiment
         # Return a list of dealer short name
-        return HttpResponse(dealer_names, ' ')
+        return render(request, 'djangoapp/dealer_details.html', context)
 
 # Create a `add_review` view to submit a review
 @csrf_exempt
