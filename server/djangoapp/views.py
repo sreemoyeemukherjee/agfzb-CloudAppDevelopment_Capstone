@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.http import HttpResponseRedirect, HttpResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404, render, redirect
 # from .models import related models
@@ -10,6 +9,7 @@ from django.contrib import messages
 from datetime import datetime
 import logging
 import json
+import random
 
 # Get an instance of a logger
 logger = logging.getLogger(__name__)
@@ -152,7 +152,7 @@ def add_review(request, dealer_id):
         url= "https://b2918b6e.us-south.apigw.appdomain.cloud/capstone/api/review"
         review=dict()
         json_payload=dict()
-        review["time"] = datetime.utcnow().isoformat()
+        #review["time"] = datetime.utcnow().isoformat()
         reviews = get_dealer_reviews_from_cf(url, dealer_id)
         context['reviews'] = reviews
         url = "https://b2918b6e.us-south.apigw.appdomain.cloud/capstone/api/dealership"
@@ -161,17 +161,32 @@ def add_review(request, dealer_id):
         for d in dealerships:
             if(d.id == dealer_id):
                 context['dealership'] = d.full_name
-        # review["id"] = request.POST["id"]
-        # review["name"] = request.POST["name"]
-        # review["dealership"] = dealer_id
-        review["review"] = request.POST["content"]
-        review["purchase"] = request.POST["purchasecheck"]
+        review["id"] = random.randint(2000, 3000)
+        review["name"] = request.user.username
+        review["dealership"] = dealer_id
+        review["review"] = request.POST.get("content", False)
+        if request.POST.get("purchasecheck", False) == 'on':
+            review["purchase"] = True
+            review["purchase_date"] = request.POST.get("purchasedate", False)
+            for r in reviews:
+                if int(r.id) == int(request.POST["car"]):
+                    review["car_make"] = r.car_make
+                    review["car_model"] = r.car_model                  
+                    review["car_year"] = r.car_year
+        else:
+            review["purchase"] = False
+            review["purchase_date"] = ""
+            review["car_make"] = ""
+            review["car_model"] = ""               
+            review["car_year"] = ""
         # another = dict["review"]["another"]
-        review["purchase_date"] = request.POST["purchasedate"]
-        review["car_make"] = request.POST["car_make"]
-        # car_model = dict["review"]["car_model"]
-        # car_year = dict["review"]["car_year"]
+        
+        review["another"] = ""
+        #review["car_model"] = request.POST.get("car", False)
+        #review["car_year"] = request.POST.get("car", False)
         json_payload["review"] = review
+        #print("DATA TO BE POSTED: ", json_payload['review'])
+        url= "https://b2918b6e.us-south.apigw.appdomain.cloud/capstone/api/review"
         data = post_request(url, json_payload, dealerId=dealer_id)
         context['dealer_id'] = dealer_id
     return render(request, 'djangoapp/add_review.html', context)

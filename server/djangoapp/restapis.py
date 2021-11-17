@@ -28,6 +28,7 @@ def get_request(url, **kwargs):
             print(response.get_result)
             if response.get_result().get('entities'):
                 json_data = response.get_result().get('entities')[0].get('sentiment').get('label')
+                print("JSON DATA: ", json_data)
             else:
                 json_data = ""
         else:
@@ -36,9 +37,9 @@ def get_request(url, **kwargs):
             print("With status {} ".format(status_code))
             json_data = json.loads(response.text)
     
-    except:
+    except Exception as e:
         # If any error occurs
-        print("Network exception occurred")
+        print("Network exception occurred: ", e.message)
     print(json_data)
     return json_data
 
@@ -130,10 +131,12 @@ def analyze_review_sentiments(dealerreview):
 
 def post_request(url, json_payload, **kwargs):
     print(kwargs)
-    print("GET from {} ".format(url))
+    print(json_payload)
+    print("POST to {} ".format(url))
     try:
         response = requests.post(url, params=kwargs, json=json_payload)
         status_code = response.status_code
+        print(response.text)
         print("With status {} ".format(status_code))
     except:
         # If any error occurs
