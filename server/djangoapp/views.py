@@ -122,6 +122,7 @@ def get_dealer_details(request, dealer_id):
         # Get reviews from the URL
         reviews = get_dealer_reviews_from_cf(url, dealer_id)
         context['reviews'] = reviews
+        context['dealer_id'] = dealer_id
         dealer_names=""
         # Concat all dealer's short name
         for review in reviews:
