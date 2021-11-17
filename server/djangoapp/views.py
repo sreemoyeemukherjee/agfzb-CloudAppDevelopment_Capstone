@@ -132,16 +132,39 @@ def get_dealer_details(request, dealer_id):
         return render(request, 'djangoapp/dealer_details.html', context)
 
 # Create a `add_review` view to submit a review
-@csrf_exempt
 def add_review(request, dealer_id):
-    #if request.user.is_authenticated() and request.method == "POST":
+    context = dict()
+    if request.method == "GET":
+        url = "https://b2918b6e.us-south.apigw.appdomain.cloud/capstone/api/review"
+        # Get reviews from the URL
+        reviews = get_dealer_reviews_from_cf(url, dealer_id)
+        context['reviews'] = reviews
+        context['dealer_id'] = dealer_id
+        url = "https://b2918b6e.us-south.apigw.appdomain.cloud/capstone/api/dealership"
+        # Get dealers from the URL
+        dealerships = get_dealers_from_cf(url)
+        for d in dealerships:
+            if(d.id == dealer_id):
+                context['dealership'] = d.full_name
+        return render(request, 'djangoapp/dealer_details.html', context)
+
+    elif request.user.is_authenticated and request.method == "POST":
         url= "https://b2918b6e.us-south.apigw.appdomain.cloud/capstone/api/review"
         review=dict()
+        json_payload=dict()
         review["time"] = datetime.utcnow().isoformat()
-        review["id"] = request["id"]
-        review["name"] = request["name"]
-        review["dealership"] = dealer_id
-        review["review"] = request["review"]
+        reviews = get_dealer_reviews_from_cf(url, dealer_id)
+        context['reviews'] = reviews
+        url = "https://b2918b6e.us-south.apigw.appdomain.cloud/capstone/api/dealership"
+        # Get dealers from the URL
+        dealerships = get_dealers_from_cf(url)
+        for d in dealerships:
+            if(d.id == dealer_id):
+                context['dealership'] = d.full_name
+        # review["id"] = request.POST["id"]
+        # review["name"] = request.POST["name"]
+        # review["dealership"] = dealer_id
+        # review["review"] = request.POST["review"]
         # purchase = dict["review"]["purchase"]
         # another = dict["review"]["another"]
         # purchase_date = dict["review"]["purchase_date"]
@@ -150,4 +173,5 @@ def add_review(request, dealer_id):
         # car_year = dict["review"]["car_year"]
         json_payload["review"] = review
         data = post_request(url, json_payload, dealerId=dealer_id)
-        return HttpResponse(data)
+        context['dealer_id'] = dealer_id
+    return render(request, 'djangoapp/add_review.html', context)
