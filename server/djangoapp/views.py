@@ -164,11 +164,11 @@ def add_review(request, dealer_id):
         # review["id"] = request.POST["id"]
         # review["name"] = request.POST["name"]
         # review["dealership"] = dealer_id
-        # review["review"] = request.POST["review"]
-        # purchase = dict["review"]["purchase"]
+        review["review"] = request.POST["content"]
+        review["purchase"] = request.POST["purchasecheck"]
         # another = dict["review"]["another"]
-        # purchase_date = dict["review"]["purchase_date"]
-        # car_make = dict["review"]["car_make"]
+        review["purchase_date"] = request.POST["purchasedate"]
+        review["car_make"] = request.POST["car_make"]
         # car_model = dict["review"]["car_model"]
         # car_year = dict["review"]["car_year"]
         json_payload["review"] = review
