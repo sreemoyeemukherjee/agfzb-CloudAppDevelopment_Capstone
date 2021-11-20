@@ -134,18 +134,18 @@ def get_dealer_details(request, dealer_id):
 # Create a `add_review` view to submit a review
 def add_review(request, dealer_id):
     context = dict()
+    context['dealer_id'] = dealer_id
+    url = "https://b2918b6e.us-south.apigw.appdomain.cloud/capstone/api/dealership"
+    # Get dealers from the URL
+    dealerships = get_dealers_from_cf(url)
+    for d in dealerships:
+        if(d.id == dealer_id):
+            context['dealership'] = d.full_name
     if request.method == "GET":
         url = "https://b2918b6e.us-south.apigw.appdomain.cloud/capstone/api/review"
         # Get reviews from the URL
         reviews = get_dealer_reviews_from_cf(url, dealer_id)
         context['reviews'] = reviews
-        context['dealer_id'] = dealer_id
-        url = "https://b2918b6e.us-south.apigw.appdomain.cloud/capstone/api/dealership"
-        # Get dealers from the URL
-        dealerships = get_dealers_from_cf(url)
-        for d in dealerships:
-            if(d.id == dealer_id):
-                context['dealership'] = d.full_name
         return render(request, 'djangoapp/dealer_details.html', context)
 
     elif request.user.is_authenticated and request.method == "POST":
@@ -155,12 +155,6 @@ def add_review(request, dealer_id):
         #review["time"] = datetime.utcnow().isoformat()
         reviews = get_dealer_reviews_from_cf(url, dealer_id)
         context['reviews'] = reviews
-        url = "https://b2918b6e.us-south.apigw.appdomain.cloud/capstone/api/dealership"
-        # Get dealers from the URL
-        dealerships = get_dealers_from_cf(url)
-        for d in dealerships:
-            if(d.id == dealer_id):
-                context['dealership'] = d.full_name
         review["id"] = random.randint(2000, 3000)
         review["name"] = request.user.username
         review["dealership"] = dealer_id
@@ -186,7 +180,7 @@ def add_review(request, dealer_id):
         #review["car_year"] = request.POST.get("car", False)
         json_payload["review"] = review
         #print("DATA TO BE POSTED: ", json_payload['review'])
-        url= "https://b2918b6e.us-south.apigw.appdomain.cloud/capstone/api/review"
-        data = post_request(url, json_payload, dealerId=dealer_id)
-        context['dealer_id'] = dealer_id
+        if(review["review"] != False):
+            data = post_request(url, json_payload, dealerId=dealer_id)
+            return redirect("djangoapp:add_review", dealer_id=dealer_id)
     return render(request, 'djangoapp/add_review.html', context)
